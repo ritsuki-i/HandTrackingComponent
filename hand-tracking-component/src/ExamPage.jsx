@@ -1,7 +1,7 @@
 // ExamPage.jsx
 
 import React from 'react';
-import HandTrackingDemo from './HandTrackingDemo';
+import AirCursor from './AirCursor';
 
 // スタイルオブジェクト（縦横1.5倍に調整）
 const styles = {
@@ -72,7 +72,7 @@ const ExamPage = () => {
       {/* ヘッダー */}
       <header style={styles.header}>
         <h1 style={{ fontSize: '36px' }}>Exam Page</h1> {/* フォントサイズを1.5倍に */}
-        <HandTrackingDemo />
+        <AirCursor />
         <button
           style={styles.button}
           onClick={() => handleClick('ヘッダー')}

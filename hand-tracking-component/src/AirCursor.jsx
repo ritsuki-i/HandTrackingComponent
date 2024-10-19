@@ -1,4 +1,4 @@
-// HandTrackingDemo.jsx
+// AirCursor.jsx
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Hands } from '@mediapipe/hands';
@@ -7,7 +7,7 @@ import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { HAND_CONNECTIONS } from '@mediapipe/hands';
 import { color } from 'framer-motion';
 
-const HandTrackingDemo = () => {
+const AirCursor = () => {
     // Refs for video, canvas, and cursors
     const videoRef = useRef(null);
     const handsRef = useRef(null);
@@ -604,4 +604,4 @@ const HandTrackingDemo = () => {
         </>
     );
 };
-export default HandTrackingDemo;
+export default AirCursor;
