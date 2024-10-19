@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import HandTrackingTest from './HandTrackingTest';
-import HandTrackingDemo from './HandTrackingDemo';
+import ExamPage from './ExamPage';
 import UsagePage from './UsagePage';
 
 
@@ -11,7 +11,7 @@ function App() {
       <Main />
       <Routes>
         <Route path="/test" element={<HandTrackingTest />} />
-        <Route path="/demo" element={<HandTrackingDemo />} />
+        <Route path="/demo" element={<ExamPage />} />
         <Route path="/usage" element={<UsagePage />} />
       </Routes>
     </Router>

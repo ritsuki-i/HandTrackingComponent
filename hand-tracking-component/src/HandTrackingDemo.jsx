@@ -5,27 +5,60 @@ import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { HAND_CONNECTIONS } from '@mediapipe/hands';
+import { color } from 'framer-motion';
 
 const HandTrackingDemo = () => {
     // Refs for video, canvas, and cursors
     const videoRef = useRef(null);
+    const handsRef = useRef(null);
     const canvasRef = useRef(null);
     const redCursorRef = useRef(null);
     const blueCursorRef = useRef(null);
     const yellowCursorRef = useRef(null);
+    const lastClickRef = useRef({ x: null, y: null });
 
     // State for managing UI
     const [showPopup, setShowPopup] = useState(false);
     const [showSystem, setShowSystem] = useState(false);
     const [showVideo, setShowVideo] = useState(false);
     const [videoPosition, setVideoPosition] = useState('bottom-right'); // default position
+    const [instructionsConfirmed, setInstructionsConfirmed] = useState(false);
+
 
     // Refs for drag state
     const lastXRef = useRef(null);
     const lastYRef = useRef(null);
     const isDraggingRef = useRef(false);
 
+    // Ref to store canvasRect
+    const canvasRectRef = useRef({ left: 0, top: 0, width: 0, height: 0 });
+
+    // スクロール位置を保持するリファレンスを作成
+    const scrollYRef = useRef(0);
+
     useEffect(() => {
+        // Function to update canvasRectRef
+        const updateCanvasRect = () => {
+            if (canvasRef.current) {
+                canvasRectRef.current = canvasRef.current.getBoundingClientRect();
+            }
+        };
+
+        // スクロール位置を追跡するuseEffect
+        const handleScroll = () => {
+            scrollYRef.current = window.scrollY;
+            // Canvasの位置も更新
+            updateCanvasRect();
+            // デバッグ用にスクロール位置をログに出力
+            console.log('Current Scroll Y:', scrollYRef.current);
+        };
+
+        // スクロールイベントリスナーを追加
+        window.addEventListener('scroll', handleScroll);
+
+        // 初期スクロール位置を設定
+        handleScroll();
+
         // HandsとCameraの初期化はshowSystemがtrueのときにのみ行う
         if (!showSystem) return;
 
@@ -44,31 +77,31 @@ const HandTrackingDemo = () => {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // Initialize Hands
-        const hands = new Hands({
-            locateFile: (file) => {
-                // 非SIMD バージョンを使用する場合は以下を使用
-                // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file.replace('_simd', '')}`;
-                
-                // SIMD バージョンを使用する場合は以下を使用
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            },
-        });
+        if (!handsRef.current) {
+            handsRef.current = new Hands({
+                locateFile: (file) => {
+                    // 非SIMD バージョンを使用する場合は以下を使用
+                    // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file.replace('_simd', '')}`;
 
-        hands.setOptions({
+                    // SIMD バージョンを使用する場合は以下を使用
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                },
+            });
+            handsRef.current.onResults(onResults);
+        }
+
+        handsRef.setOptions({
             maxNumHands: 1, // Detect one hand
             modelComplexity: 1,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5,
         });
 
-        hands.onResults(onResults);
-
         // Initialize Camera
         const cameraInstance = new Camera(videoElement, {
             onFrame: async () => {
                 try {
-                    await hands.send({ image: videoElement });
+                    await handsRef.send({ image: videoElement });
                 } catch (error) {
                     console.error('Hands send error:', error);
                 }
@@ -86,7 +119,7 @@ const HandTrackingDemo = () => {
             // ミラー表示をキャンバスコンテキストで行わない
 
             // Fill background with white
-            canvasCtx.fillStyle = '#FFFFFF';
+            canvasCtx.fillStyle = '#ffffff00';
             canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
 
             // If landmarks are detected
@@ -144,6 +177,13 @@ const HandTrackingDemo = () => {
                         canvasCtx.fill();
                         canvasCtx.stroke();
 
+                        // Show and position blue cursor
+                        redCursor.style.display = 'block';
+                        const redCursorX = (x2 + x3) / 2;
+                        const redCursorY = (y2 + y3) / 2;
+                        redCursor.style.left = `${canvasElement.width - redCursorX}px`; // No mirroring
+                        redCursor.style.top = `${redCursorY + scrollYRef.current}px`;
+
                         // Handle scrolling
                         if (index_middle_distance > 40) {
                             if (lastXRef.current !== null && lastYRef.current !== null) {
@@ -177,10 +217,10 @@ const HandTrackingDemo = () => {
 
                         // Show and position blue cursor
                         blueCursor.style.display = 'block';
-                        const cursorX = (x2 + x3) / 2;
-                        const cursorY = (y2 + y3) / 2;
-                        blueCursor.style.left = `${canvasElement.width - cursorX}px`; // No mirroring
-                        blueCursor.style.top = `${cursorY}px`;
+                        const blueCursorX = (x2 + x3) / 2;
+                        const blueCursorY = (y2 + y3) / 2;
+                        blueCursor.style.left = `${canvasElement.width - blueCursorX}px`; // No mirroring
+                        blueCursor.style.top = `${blueCursorY + scrollYRef.current}px`;
 
                         // If thumb and index are also close, draw yellow point
                         if (thumb_index_distance <= 40) {
@@ -201,7 +241,39 @@ const HandTrackingDemo = () => {
                             const yellowCursorX = (x1 + x2 + x3) / 3;
                             const yellowCursorY = (y1 + y2 + y3) / 3;
                             yellowCursor.style.left = `${canvasElement.width - yellowCursorX}px`; // No mirroring
-                            yellowCursor.style.top = `${yellowCursorY}px`;
+                            yellowCursor.style.top = `${yellowCursorY + scrollYRef.current}px`;
+
+                            // 座標をビューポート座標系に変換
+                            const canvasRect = canvasElement.getBoundingClientRect();
+                            const cursorXClient = canvasRect.left + (canvasElement.width - yellowCursorX) / canvasElement.width * canvasRect.width;
+                            const cursorYClient = canvasRect.top + yellowCursorY / canvasElement.height * canvasRect.height;
+
+                            // デバッグログ
+                            console.log('Yellow Cursor Client Coordinates:', cursorXClient, cursorYClient);
+
+                            // 要素を取得
+                            const element = document.elementFromPoint(cursorXClient, cursorYClient);
+                            console.log('Element at cursor:', element);
+
+                            // deltaClick の計算
+                            const deltaClick = lastClickRef.current.x === null || lastClickRef.current.y === null ||
+                                Math.hypot(cursorXClient - lastClickRef.current.x, cursorYClient + scrollYRef.current - lastClickRef.current.y) > 10;
+
+                            if (deltaClick && element) {
+                                // クリックイベントを作成
+                                const clickEvent = new MouseEvent('click', {
+                                    view: window,
+                                    bubbles: true,
+                                    cancelable: true,
+                                });
+
+                                // 取得した要素にクリックイベントをディスパッチ
+                                element.dispatchEvent(clickEvent);
+                                console.log('Click event dispatched to:', element);
+
+                                // 最後のクリック位置を更新
+                                lastClickRef.current = { x: cursorXClient, y: cursorYClient + scrollYRef.current };
+                            }
                         } else {
                             // Hide yellow cursor if thumb and index are not close
                             yellowCursor.style.display = 'none';
@@ -236,8 +308,12 @@ const HandTrackingDemo = () => {
         return () => {
             // Cleanup on unmount
             cameraInstance.stop();
-            hands.close();
+            if (handsRef.current) {
+                handsRef.current.close();
+                handsRef.current = null;
+            }
             window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('scroll', handleScroll);
         };
     }, [showSystem]); // showVideoを依存から外す
 
@@ -257,7 +333,7 @@ const HandTrackingDemo = () => {
     // Function to get video style based on position
     const getVideoStyle = () => {
         const baseStyle = {
-            position: 'absolute',
+            position: 'fixed',
             width: '320px',
             height: '180px',
             transform: 'scaleX(-1)', // Mirror display
@@ -288,16 +364,6 @@ const HandTrackingDemo = () => {
             {!showSystem && (
                 <button
                     onClick={() => setShowPopup(true)}
-                    style={{
-                        position: 'fixed',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        padding: '20px 40px',
-                        fontSize: '18px',
-                        cursor: 'pointer',
-                        zIndex: 1000,
-                    }}
                 >
                     ハンドトラッキングシステムを使用する
                 </button>
@@ -324,12 +390,57 @@ const HandTrackingDemo = () => {
                             backgroundColor: '#fff',
                             padding: '30px',
                             borderRadius: '10px',
-                            width: '400px',
+                            width: '500px',
                             boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                            color: '#000',
+                            position: 'relative',
                         }}
                     >
-                        <h2 style={{ textAlign: 'center' }}>設定</h2>
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowPopup(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '10px',
+                                right: '10px',
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '30px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            ×
+                        </button>
+
+                        {/* Usage Instructions */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <h3>このシステムの使い方</h3>
+                            <ul>
+                                <li>
+                                    親指と人差し指のみを合わせると<span style={{ color: 'red' }}>●</span>が出現します。そのとき画面をつかんでスクロールすることができます。
+                                </li>
+                                <li>
+                                    人差し指と中指を合わせると<span style={{ color: 'blue' }}>●</span>が出現します。これはマウスのポインタの役割を持っています。
+                                </li>
+                                <li>
+                                    <span style={{ color: 'blue' }}>●</span>が出現しているときに追加で親指を合わせると<span style={{ color: 'yellow' }}>●</span>が出現します。そのときクリックイベントが発生します。
+                                </li>
+                            </ul>
+                        </div>
+
                         <form onSubmit={handleConfigurationSubmit}>
+                            {/* Confirmation Checkbox */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={instructionsConfirmed}
+                                        onChange={(e) => setInstructionsConfirmed(e.target.checked)}
+                                    />
+                                    {' '}操作説明を確認しました
+                                </label>
+                            </div>
+
                             <div style={{ marginBottom: '20px' }}>
                                 <label>
                                     <input
@@ -391,22 +502,27 @@ const HandTrackingDemo = () => {
                                 </div>
                             )}
 
-                            <div style={{ textAlign: 'center' }}>
-                                <button
-                                    type="submit"
-                                    style={{
-                                        padding: '10px 20px',
-                                        fontSize: '16px',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    開始
-                                </button>
-                            </div>
+                            {/* Show the Start button only if instructions are confirmed */}
+                            {instructionsConfirmed && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <button
+                                        type="submit"
+                                        style={{
+                                            padding: '10px 20px',
+                                            fontSize: '16px',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        開始
+                                    </button>
+                                </div>
+                            )}
                         </form>
                     </div>
                 </div>
             )}
+
+
 
             {/* Hand Tracking System Overlay */}
             {showSystem && (
@@ -431,7 +547,7 @@ const HandTrackingDemo = () => {
                             width: '100%',
                             height: '100%',
                             transform: 'scaleX(-1)', // ミラー表示を削除
-                            zIndex: 999,
+                            zIndex: -1,
                         }}
                     ></canvas>
 
@@ -472,19 +588,20 @@ const HandTrackingDemo = () => {
                         ref={yellowCursorRef}
                         style={{
                             position: 'absolute', // Absolute positioning relative to container
-                            width: '10px',
+                            width: '10px', // サイズを大きく
                             height: '10px',
                             backgroundColor: 'yellow',
                             borderRadius: '50%',
-                            pointerEvents: 'none',
+                            pointerEvents: 'auto', // イベントを受け取れるように
                             transform: 'translate(-50%, -50%)',
                             display: 'none',
-                            zIndex: 1000,
+                            zIndex: 1001, // 前面に表示
+                            cursor: 'pointer', // ポインターに変更
                         }}
                     ></div>
                 </>
             )}
         </>
-    ); 
+    );
 };
 export default HandTrackingDemo;
