@@ -23,11 +23,11 @@ function HandTrackingTest() {
 
     // Handsソリューションの初期化
     const hands = new Hands({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-      },
-    });
-
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        },
+      });
+      
     hands.setOptions({
       maxNumHands: 1, // 手の検出を片手に設定
       modelComplexity: 1,

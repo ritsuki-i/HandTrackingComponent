@@ -36,6 +36,41 @@ const AirCursor = () => {
     // スクロール位置を保持するリファレンスを作成
     const scrollYRef = useRef(0);
 
+    // クリックイベントのある要素を取得
+    /**
+ * 指定した座標にあるクリック可能な要素を取得します。
+ * @param {number} x - ビューポートのX座標
+ * @param {number} y - ビューポートのY座標
+ * @returns {Element|null} - クリック可能な要素、存在しない場合は null
+ */
+    const getClickableElement = (x, y) => {
+        // 指定した座標にあるすべての要素を取得（上から下へ）
+        const elements = document.elementsFromPoint(x, y);
+        const interactiveTags = ['button', 'a', 'input', 'select', 'textarea', 'label'];
+
+        for (let element of elements) {
+            const tagName = element.tagName.toLowerCase();
+            const role = element.getAttribute('role');
+
+            // インタラクティブなタグまたは role="button" を持つ要素をチェック
+            if (
+                interactiveTags.includes(tagName) ||
+                role === 'button'
+            ) {
+                // 要素が非表示でないこと、かつ無効化されていないことを確認
+                if (
+                    !element.disabled &&
+                    element.offsetParent !== null
+                ) {
+                    return element;
+                }
+            }
+        }
+
+        return null;
+    };
+
+
     useEffect(() => {
         // Function to update canvasRectRef
         const updateCanvasRect = () => {
@@ -90,18 +125,20 @@ const AirCursor = () => {
             handsRef.current.onResults(onResults);
         }
 
-        handsRef.setOptions({
-            maxNumHands: 1, // Detect one hand
-            modelComplexity: 1,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5,
-        });
+        if (handsRef.current) {
+            handsRef.current.setOptions({
+                maxNumHands: 1, // Detect one hand
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5,
+            });
+        }
 
         // Initialize Camera
         const cameraInstance = new Camera(videoElement, {
             onFrame: async () => {
                 try {
-                    await handsRef.send({ image: videoElement });
+                    await handsRef.current.send({ image: videoElement });
                 } catch (error) {
                     console.error('Hands send error:', error);
                 }
@@ -252,7 +289,7 @@ const AirCursor = () => {
                             console.log('Yellow Cursor Client Coordinates:', cursorXClient, cursorYClient);
 
                             // 要素を取得
-                            const element = document.elementFromPoint(cursorXClient, cursorYClient);
+                            const element = getClickableElement(cursorXClient, cursorYClient);
                             console.log('Element at cursor:', element);
 
                             // deltaClick の計算
