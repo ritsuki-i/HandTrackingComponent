@@ -1,70 +1,90 @@
-# Getting Started with Create React App
+# AirCursor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AirCursorは、マウスを使わずに手のモーションのみでPCを操作できるReactコンポーネントです。
 
-## Available Scripts
+## インストール
 
-In the project directory, you can run:
+以下のコマンドを実行して、AirCursorをインストールします。
 
-### `npm start`
+```bash
+npm install air-cursor
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+インストールが完了したら、`package.json`に`air-cursor`が含まれていることを確認してください。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## アップグレード
 
-### `npm test`
+AirCursorの新しいバージョンがリリースされた場合、以下のコマンドを使用してアップグレードできます。
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm update air-cursor
+```
 
-### `npm run build`
+または、特定のバージョンにアップグレードしたい場合は、次のようにバージョン番号を指定します：
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install air-cursor@latest
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`@latest`を指定すると、最も新しいバージョンがインストールされます。
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 使い方
 
-### `npm run eject`
+### ReactコンポーネントにAirCursorをインポート
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+以下のようにReactコンポーネント内にAirCursorをインポートします:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```javascript
+import AirCursor from 'air-cursor';
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### AirCursorコンポーネントを追加
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+JSX内に`<AirCursor />`を追加して、AirCursorを使用可能にします:
 
-## Learn More
+```jsx
+<AirCursor />
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### buttonTextプロパティの設定
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+`<AirCursor />`コンポーネントには、初期設定ボタンのテキストをカスタマイズするための`buttonText`プロパティを設定できます（デフォルトは「ハンドトラッキングシステムを使用する」になっています）。例えば、ボタンのテキストを"開始"に変更する場合は以下のようにします:
 
-### Code Splitting
+```jsx
+<AirCursor buttonText="開始" />
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 初期設定
 
-### Analyzing the Bundle Size
+初めて`<AirCursor />`を表示すると、ボタンのみが出力されます。このボタンをクリックすると、ポップアップが表示され、使い方を確認するチェックボックスを押す必要があります。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### カメラビューの選択
 
-### Making a Progressive Web App
+使用するウェブカメラの映像を画面に表示するか、または映像の配置場所を選択します。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### カメラ使用の許可
 
-### Advanced Configuration
+次に、ウェブブラウザからカメラの使用許可を求める通知が表示されます。許可を与えると、AirCursorの使用を開始できます。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 機能
 
-### Deployment
+AirCursorは、以下の3つの機能を備えています。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. **画面をつかんでスクロール**
 
-### `npm run build` fails to minify
+   - 人差し指と親指を合わせると、赤いポインタが表示されます。この状態で「つかんでいる」状態となり、手を上下に動かすことで画面をスクロールできます。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+2. **ポインタの合わせ**
+
+   - 人差し指と中指を合わせると、青いポインタが表示され、クリックしたい箇所に照準を合わせます。
+
+3. **クリック**
+
+   - 青いポインタが表示された状態で、親指を人差し指と中指に合わせて3本の指が揃うと、黄色いポインタが出現し、クリックイベントが発生します。これにより、照準を合わせた要素がクリックされます。
+
+## 使用のコツ
+
+**誤認識を防ぐために:**
+
+- スクロールさせたい場合、親指と人差し指を合わせる必要がありますが、その際に使用していない他の指（中指や薬指など）が親指や人差し指に近づいていると誤って認識されることがあります。そのため、使用していない指はできるだけ立てておくと、正確に認識されやすくなります。
+

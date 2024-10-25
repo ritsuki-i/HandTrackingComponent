@@ -1,7 +1,7 @@
 // ExamPage.jsx
 
 import React from 'react';
-import AirCursor from './AirCursor';
+import AirCursor from 'air-cursor';
 
 // スタイルオブジェクト（縦横1.5倍に調整）
 const styles = {

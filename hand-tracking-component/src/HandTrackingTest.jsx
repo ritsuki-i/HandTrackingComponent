@@ -197,7 +197,7 @@ function HandTrackingTest() {
   return (
     <div
       className="container"
-      style={{ position: 'relative', width: '1280px', height: '720px' }}
+      style={{ position: 'relative', width: '100vw', height: '100vh' }}
     >
       <video
         ref={videoRef}
