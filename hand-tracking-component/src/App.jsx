@@ -15,11 +15,11 @@ function App() {
   }, []);
 
   const PageDown = async () => {
-    window.scrollBy({
-      top: window.innerHeight * 3,
-      left: 0,
-      behavior: 'smooth'
-    });
+    const target = document.querySelector('.documentation');
+    if (target) {
+      const topPosition = target.offsetTop;
+      window.scrollTo({ top: topPosition, left: 0, behavior: 'smooth' });
+    }
   }
 
   return (
@@ -63,7 +63,7 @@ function App() {
         <div style={{ margin: 0, padding: 0, overflow: 'hidden', backgroundColor: '#000000', height: '100vh', width: '100vw', display: 'flex', position: 'relative' }}>
           <DemoPage />
         </div>
-        <div style={{ margin: 0, padding: 0, overflow: 'hidden', backgroundColor: '#ffffff', width: '100vw', display: 'flex', position: 'relative' }}>
+        <div className="documentation" style={{ margin: 0, padding: 0, overflow: 'hidden', backgroundColor: '#ffffff', width: '100vw', display: 'flex', position: 'relative' }}>
           <AirCursorDocumentation />
         </div>
       </div>

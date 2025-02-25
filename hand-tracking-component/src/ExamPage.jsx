@@ -1,7 +1,7 @@
 // ExamPage.jsx
 
 import React from 'react';
-import AirCursor from 'air-cursor';
+// import AirCursor from 'air-cursor';
 
 // スタイルオブジェクト（縦横1.5倍に調整）
 const styles = {
@@ -12,7 +12,7 @@ const styles = {
     fontFamily: 'Arial, sans-serif',
   },
   header: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAf40',
     padding: '30px', // 20px * 1.5
     textAlign: 'center',
     color: 'white',
@@ -27,7 +27,7 @@ const styles = {
     backgroundColor: '#f0f0f0',
   },
   footer: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAf40',
     padding: '30px', // 20px * 1.5
     textAlign: 'center',
     color: 'white',
@@ -72,7 +72,7 @@ const ExamPage = () => {
       {/* ヘッダー */}
       <header style={styles.header}>
         <h1 style={{ fontSize: '36px' }}>Exam Page</h1> {/* フォントサイズを1.5倍に */}
-        <AirCursor />
+        {/* <AirCursor /> */}
         <button
           style={styles.button}
           onClick={() => handleClick('ヘッダー')}
